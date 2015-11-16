@@ -1,8 +1,8 @@
 [DIRECTORIES]
-ROOT_DIR=/nfs/research2/teichmann/frederik/
-TEMP_DIR=/panfs/nobackup/research/saraht/pipeline/data/
-REF_DIR = /panfs/nobackup/research/saraht/pipeline/reference/
-TOOLS_MAPPING = 	
+ROOT_DIR=/data1/scRNAdata/MouseKO/
+TEMP_DIR=/data1/temp/
+REF_DIR = /data1/reference_genomes/
+TOOLS_MAPPING = /usr/bin/mapping/
 TOOLS_QUANTIFICATION = /homes/ti1/tools/quantification/
 MAPPING_ROOT = mapped
 QUANTIFICATION_ROOT = counts
@@ -34,21 +34,22 @@ REVERSE_STRAND = _2
 [SOFTWARE]
 GSNAP=/bin/gsnap
 GSNAP_BUILD=/bin/gmap_build
-GTF_SPLICE_TOOL = /bin/gtf_splicesites
-GTF_IIT_TOOL = /bin/iit_store
-HTSEQTOOL=/scripts/htseq-count
-BOWTIE1_BUILD=/bowtie-build
 BOWTIE1=/bowtie
-BOWTIE2_BUILD=/bowtie2-build
+BOWTIE1_BUILD=/bowtie-build
 BOWTIE2=/bowtie2
-BWA_BUILD=/bwa
+BOWTIE2_BUILD=/bowtie2-build
 BWA=/bwa
-STAR_BUILD=/source/STAR
+BWA_BUILD=/bwa
 STAR = /source/STAR
+STAR_BUILD=/source/STAR
+SALMON = /bin/salmon
+SALMON_BUILD = /bin/salmon
+
+HTSEQTOOL=/scripts/htseq-count
 TOPHAT=/tophat2
 CUFFLINKS=/cufflinks
-SALMON_BUILD = /bin/salmon
-SALMON = /bin/salmon
 PICARD_TOOL = /nfs/research2/teichmann/tools/picard-tools-1.113
 BAM_2_FASTQ=/homes/ti1/tools/bam2fastq-1.1.0/bam2fastq
 SAMTOOLS=/homes/ti1/tools/samtools-0.1.19/samtools
+GTF_SPLICE_TOOL = /bin/gtf_splicesites
+GTF_IIT_TOOL = /bin/iit_store
