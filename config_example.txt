@@ -1,0 +1,54 @@
+[DIRECTORIES]
+ROOT_DIR=/nfs/research2/teichmann/frederik/
+TEMP_DIR=/panfs/nobackup/research/saraht/pipeline/data/
+REF_DIR = /panfs/nobackup/research/saraht/pipeline/reference/
+TOOLS_MAPPING = 	
+TOOLS_QUANTIFICATION = /homes/ti1/tools/quantification/
+MAPPING_ROOT = mapped
+QUANTIFICATION_ROOT = counts
+PREPROCESSED_ROOT = preprocessed
+SORTED_BAM_ROOT = sorted_bam
+SAM_ROOT = sam
+
+
+[EXTENSIONS]
+EXT_BAM = .bam
+EXT_FASTQ= .fq
+EXT_FASTQ_GZ = .fq.gz
+EXT_SAM = .sam
+EXT_SORTED = .sorted
+EXT_COUNTS = .counts
+EXT_METRICS = .metrics
+EXT_MERGED = .merged
+EXT_MARKED_DUPL= .marked.duplicates
+EXT_FASTA = .fa
+EXT_LOG = .log
+EXT_GTF= .gtf
+EXT_GSNAP_SPLICE = .splice_sites
+EXT_GSNAP_IIT = .iit
+EXT_DICT = .dict
+EXT_SUMMARY = .stat
+FORWARD_STRAND = _1
+REVERSE_STRAND = _2
+
+[SOFTWARE]
+GSNAP=/bin/gsnap
+GSNAP_BUILD=/bin/gmap_build
+GTF_SPLICE_TOOL = /bin/gtf_splicesites
+GTF_IIT_TOOL = /bin/iit_store
+HTSEQTOOL=/scripts/htseq-count
+BOWTIE1_BUILD=/bowtie-build
+BOWTIE1=/bowtie
+BOWTIE2_BUILD=/bowtie2-build
+BOWTIE2=/bowtie2
+BWA_BUILD=/bwa
+BWA=/bwa
+STAR_BUILD=/source/STAR
+STAR = /source/STAR
+TOPHAT=/tophat2
+CUFFLINKS=/cufflinks
+SALMON_BUILD = /bin/salmon
+SALMON = /bin/salmon
+PICARD_TOOL = /nfs/research2/teichmann/tools/picard-tools-1.113
+BAM_2_FASTQ=/homes/ti1/tools/bam2fastq-1.1.0/bam2fastq
+SAMTOOLS=/homes/ti1/tools/samtools-0.1.19/samtools

@@ -74,7 +74,7 @@ def run(args):
     available_quants = list_dirs(TOOLS_QUANTIFICATION);
     available_mapper = list_dirs(TOOLS_MAPPING);  
     commands = [] 
-    commands.append("perl " + os.path.dirname(sys.argv[0]) + "/pipeline.pl")
+    commands.append("perl " + os.path.dirname(sys.argv[0]) + "/pipeline.pl") # leftover?
     commands.append("-c " + args.config)
     files_process = set()
 
@@ -111,7 +111,7 @@ def run(args):
     else:
         #INPUT NEEDS TO BE SET AT THIS POINT
         if (args.input != None):
-            #THROW ERROR IF INPUT DIR NOT EXISTEND
+            #THROW ERROR IF INPUT DIR DOES NOT EXIST
             input_dir = ROOT_DIR + "/" + args.input + "/raw"
             if (not os.path.exists(input_dir)):
                 print_error("Input folder \'" + input_dir + "\' does not exist. Please create and fill it with raw data.")
@@ -507,22 +507,22 @@ if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
     group1 = p.add_argument_group('Data processing', 'Modules to process your RNA sequencing data')
-    group1.add_argument('-i','--input', help='Input directory')
-    group1.add_argument('-m','--mapping', help='Mapping algorithm')
+    group1.add_argument('-i','--input directory', required=True, help='Directory containing raw/ with raw sequencing files. Provide the path relative to ROOT_DIR path given in the config file')
+    group1.add_argument('-m','--mapping', required=True, help='Mapping program to be used. Named according to directory TOOLS_MAPPING path given in the config file')
     group1.add_argument('-margs','--mapping_args', help='Mapping algorithm additional arguments', nargs="+")
     group1.add_argument('-q','--quantification', help='Quantification algorithm')
     group1.add_argument('-q_args','--quant_args', help='Quantification algorithm additional arguments', nargs="+")
     group1.add_argument('-o','--output', help='fastq file containing R1 pairs', default="output")
     group1.add_argument('-w','--overwrite', help='Overwrite files')
-    group1.add_argument('-g','--genome', help='Reference genome')
+    group1.add_argument('-g','--genome', required=True, help='Reference genome. Must correspond to directory in REF_DIR given the config file, or to name of -f')
     group1.add_argument('-r', '--range', help='Index range to run')
     group2 = p.add_argument_group('Ref index', 'Reference genome index files')
-    group2.add_argument('-f','--fasta', help='Fasta files')
-    group2.add_argument('-gtf', help='Gene annotation file')
+    group2.add_argument('-f','--fasta', help='If provided, this fasta file will be used to build genome index for mapping, unless a genome with the same name is already present in REF_DIR path given the config file')
+    group2.add_argument('-gtf', help='Gene annotation file. Should be provided if -f is provided.')
     
     p.add_argument('-c', '--config', help='Config file')
-    p.add_argument('-ram','--ram')
-    p.add_argument('-cpu','--cpu')
+    p.add_argument('-ram','--ram', help='Allowed RAM usage')
+    p.add_argument('-cpu','--cpu', help='Allowed CPU usage')
     p.add_argument('-l', '--cluster', help='Cluster type') 
     args = p.parse_args()
     
