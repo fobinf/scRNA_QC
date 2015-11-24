@@ -9,6 +9,7 @@ QUANTIFICATION_ROOT = counts
 PREPROCESSED_ROOT = preprocessed
 SORTED_BAM_ROOT = sorted_bam
 SAM_ROOT = sam
+STATS_ROOT = stats
 
 
 [EXTENSIONS]
