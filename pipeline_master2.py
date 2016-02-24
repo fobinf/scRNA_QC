@@ -1,4 +1,4 @@
-#!/usr/local/bin/ipython
+#!/usr/bin/python
 
 __author__ = 'Tomislav Ilicic'
 __copyright__ = 'Copyright (C) 2015 Ambrose Carr'
@@ -1226,74 +1226,55 @@ def run_on_EBI(files_process_index, commands, log_file, speed=False):
     
         return code
 
-#RUN PIPELINE ON AWS CLUSTERING SYSTEM
-#REQUIRES THAT A CLUSTER IS ALREADY CREATED AND FILES ARE ALREADY THERE
-#PROBLEM: RESOURCES ARE NOT ALLOCATED PROPERLY AND ALL PROCESSESS GET EXECUTED SIMULATENOUSLY
 def run_on_AWS(files_process_index, commands, log_file):
-    import tempfile
-    import time
-    cluster_command = []
-    #GENERATE COMMAND
-    with tempfile.NamedTemporaryFile(delete=False) as temp:
-        temp.write('#!/bin/bash\n')
-        temp.write('#$ -S /bin/bash\n')
-        temp.write('#$ -cwd\n')
-        temp.write('#$ -j y\n')
-        temp.write('#$ -N ' + os.path.basename(log_file) + "\n")
-        temp.write('#$ -t ' + ",".join(files_process_index)+"\n")
-        resources = []
+        files_process_index=files_process_index[0].split('-')
+        print (files_process_index)
+        commands = [i.replace("{#}", "$1") for i in commands]
+        print (commands)
+        log_file=log_file.replace("%I", "{}")
+        print (log_file)
+
+        import time
+        code = 0
+
+        #BUILD COMMAND
+        parallel_command = []
+        parallel_command.append("exec /bin/bash -c '") # sh does not like export -f, so I have to use bash in order to wrap.
+        parallel_command.append("wrapper_func() { ") # to make sure that everything is executed beautifully we wrap it up in a function
+        parallel_command.append(" ".join(commands)) # put in the actual command.
+
+        parallel_command.append("; }; export -f wrapper_func; parallel ") # and close the wrapper and start gnu parallel call
+
+
+
         if (args.ram != None):
-                resources.append('s_vmem=' + args.ram)
-        if (args.cpu != None):
-               resources.append('s_core=' + args.cpu)
-        if (len(resources) > 0):
-                temp.write('#$ -l '+ ",".join(resources))                    
-                temp.write("\n")
-        #print log_file + '\${JOB_ID}.log'
-        temp.write('echo \"job initiated at $(date)\"\n')
-        temp.write(" ".join(commands) + " \n")
-        temp.write('echo \"job ended at $(date)\"\n')
-        temp.flush()
-
-        #RUN COMMAND        
-        cluster_command.append("qsub")
-        cluster_command.append(temp.name)
-        proc = subprocess.Popen(cluster_command, stdout=subprocess.PIPE)
-        output = proc.stdout.read()
-        print output
-        job_id_sub=output.split(" ")[2]
-        job_id_sub=job_id_sub.split(".")[0]
-        print "Submitted qsub ID: " + job_id_sub
-    
-    #CHECK STATUS
-    not_done = True
-    while (not_done):
-        cluster_command = []
-        cluster_command.append("qstat")
-        proc = subprocess.Popen(cluster_command, stdout=subprocess.PIPE)
-        output = proc.stdout.read()
-
-        status = output.split("\n")
-        if (len(status) <=2):
-            not_done = False
+            ram = args.ram
         else:
-            status = status[2:len(status)-1]
-            running = []
-            for i in range(0,len(status)):
-                stat =  status[i]
-                des = stat.split()
-                job_id =  des[0]
-                task_id = des[len(des)-1]
-                if (job_id == job_id_sub):
-                    running.append(task_id)
-            if (len(running) == 0):
-                not_done = False
-            else :
-                not_done = True
-                print "Running task-id: \n" + ",".join(running)
-                time.sleep(180)
-                
-    return 0
+            ram = 900
+        if (args.cpu != None):
+            parallel_command.append("-j" + args.cpu)
+
+
+        parallel_command.append("--retries 3") # will try three times to run failed jobs 
+        parallel_command.append("--halt soon,fail=20%") # will stop spawning more jobs if more than 20% of the jobs has failed
+        parallel_command.append("--memfree "+str(ram)+"M") # jobs will not start with <(M)ram mem free, and newest jobs will be killed and requeue when 0.5mem is left
+
+
+
+        parallel_command.append("--joblog " + log_file)
+        parallel_command.append("wrapper_func ::: "+ " ".join(files_process_index)+"'") # if cell numbers not given as interval
+
+        #EXECUTE PROCESS
+        proc = subprocess.Popen(" ".join(parallel_command), stdout=subprocess.PIPE, shell=True)
+        output = proc.stdout.read()
+        logging.info("Parallel command submitted: " + " ".join(parallel_command))
+        print(" ".join(parallel_command))
+        proc.communicate() #now wait
+
+        # get the right return code - this 
+        code = subprocess.Popen(" ".join(parallel_command), stdout=subprocess.PIPE, shell=True)
+        print (code)
+        return code
 
 ############################################
 ############################################
@@ -1400,7 +1381,6 @@ def collect_input(input_user):
             files_process_index.add(int(cell_num))
             files_index_holder.add(origin_file.replace(index_place_holder, "#{#}"))
         read_length = get_read_length(files[0])
-    
     logging.info("Paired:" + str(paired))
     logging.info("Read-length:" + str(read_length))
     return [files, files_process_index, files_index_holder, paired,read_length]

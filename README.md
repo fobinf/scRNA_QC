@@ -90,3 +90,14 @@ GTF_IIT_TOOL = /bin/iit_store                                       # -
 Link to all 3rd party programs:
 ### DOTO ####
 
+
+
+AWS
+
+create an instance US_east
+
+
+# mrjob.conf
+To make use of Amazons spot instances you may set 
+ec2_task_instance_bid_price: '0.42'
+
