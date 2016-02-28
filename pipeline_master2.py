@@ -132,7 +132,7 @@ def _write_mapping_stats(GTF_file, files_process_index, sorted_sam_files,  stats
     stats_output = stats_root + "/" + sample_name + "_{#}.stats"
 
     commands = [] 
-    commands.append("python /homes/ti1/code/git_code/st-method-comparison/generate_mapping_stats.py") 
+    commands.append("python /home/ubuntu/bin/generate_mapping_stats.py") 
     commands.append("-i")
     commands.append(sorted_sam_files)
     commands.append("-o")
@@ -1112,7 +1112,7 @@ def execute(files_process_index, commands, log_file, cluster, speed=False):
     files_process_index = [str(i) for i in files_process_index]
     
     #WRITE COMMAND TO LOG FILE
-    
+
     logging.info("Executed Command: " + " ".join(commands)) # python will convert \n to os.linesep
 
     #CHOSE EITHER OF THE TWO CLUSTERING SYSYEMS
@@ -1228,11 +1228,11 @@ def run_on_EBI(files_process_index, commands, log_file, speed=False):
 
 def run_on_AWS(files_process_index, commands, log_file):
         files_process_index=files_process_index[0].split('-')
-        print (files_process_index)
+        # print (files_process_index)
         commands = [i.replace("{#}", "$1") for i in commands]
-        print (commands)
+        # print (commands)
         log_file=log_file.replace("%I", "{}")
-        print (log_file)
+        # print (log_file)
 
         import time
         code = 0
@@ -1258,23 +1258,15 @@ def run_on_AWS(files_process_index, commands, log_file):
         parallel_command.append("--retries 3") # will try three times to run failed jobs 
         parallel_command.append("--halt soon,fail=20%") # will stop spawning more jobs if more than 20% of the jobs has failed
         parallel_command.append("--memfree "+str(ram)+"M") # jobs will not start with <(M)ram mem free, and newest jobs will be killed and requeue when 0.5mem is left
-
-
-
-        parallel_command.append("--joblog " + log_file)
-        parallel_command.append("wrapper_func ::: "+ " ".join(files_process_index)+"'") # if cell numbers not given as interval
+        parallel_command.append("wrapper_func > "+ log_file +" 2>&1 ::: "+ " ".join(files_process_index)+"'") # call the function with the inputs and catch std and err out
 
         #EXECUTE PROCESS
         proc = subprocess.Popen(" ".join(parallel_command), stdout=subprocess.PIPE, shell=True)
-        output = proc.stdout.read()
+        
         logging.info("Parallel command submitted: " + " ".join(parallel_command))
-        print(" ".join(parallel_command))
-        proc.communicate() #now wait
+        output = proc.communicate() #now wait
 
-        # get the right return code - this 
-        code = subprocess.Popen(" ".join(parallel_command), stdout=subprocess.PIPE, shell=True)
-        print (code)
-        return code
+        return proc.returncode
 
 ############################################
 ############################################
@@ -1391,8 +1383,8 @@ if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
     group1 = p.add_argument_group('Data processing', 'Modules to process your RNA sequencing data')
-    group1.add_argument('-i','--input', help='Input directory')
-    group1.add_argument('-m','--mapping', help='Mapping algorithm')
+    group1.add_argument('-i','--input', help='Input directory', required = True)
+    group1.add_argument('-m','--mapping', help='Mapping algorithm', required = True)
     group1.add_argument('-margs','--mapping_args', help='Mapping algorithm additional arguments', nargs="+")
     group1.add_argument('-q','--quantification', help='Quantification algorithm')
     group1.add_argument('-q_args','--quant_args', help='Quantification algorithm additional arguments', nargs="+")
@@ -1402,13 +1394,13 @@ if __name__ == "__main__":
     group1.add_argument('-g','--genome', help='Reference genome')
     group1.add_argument('-r', '--range', help='Index range to run')
     group2 = p.add_argument_group('Ref index', 'Reference genome index files')
-    group2.add_argument('-f','--fasta', help='Fasta files')
-    group2.add_argument('-gtf', help='Gene annotation file')
+    group2.add_argument('-f','--fasta', help='Full path to fasta files')
+    group2.add_argument('-gtf', help='Full path to gene annotation file')
     
-    p.add_argument('-c', '--config', help='Config file')
+    p.add_argument('-c', '--config', help='Config file', required = True)
     p.add_argument('-ram','--ram')
-    p.add_argument('-cpu','--cpu')
-    p.add_argument('-l', '--cluster', help='Cluster type') 
+    p.add_argument('-cpu','--cpu', help='Number of cpus that each job in the queue is allowed to use. On AWS this number should optimaly be multiple of the number of cores on the instance', required = True)
+    p.add_argument('-l', '--cluster', help='Cluster type', required = True) 
     args = p.parse_args()
     
     Config = ConfigParser.ConfigParser()
